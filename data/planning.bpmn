@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_09qflag">
+    <bpmn:participant id="Participant_Planner" name="Planner" processRef="planning" />
+    <bpmn:participant id="Participant_QA" name="QA Assistant" processRef="Process_QA" />
+  </bpmn:collaboration>
+  <bpmn:process id="planning" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Planner" name="Planner">
+        <bpmn:flowNodeRef>StartEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ATP</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ATP</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_TRIC</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RMSL</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_All</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Time</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Release</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Resched</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_QA" name="QA Assistant">
+        <bpmn:flowNodeRef>Task_QA</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent" name="Order Received" />
+    <bpmn:task id="Task_ATP" name="ATP Check (service: atpCheck)" />
+    <bpmn:exclusiveGateway id="Gateway_ATP" name="ATP ok?" />
+    <bpmn:task id="Task_TRIC" name="TRIC Check (service: tricCheck)" />
+    <bpmn:task id="Task_RMSL" name="RMSL Check (service: rmslCheck)" />
+    <bpmn:exclusiveGateway id="Gateway_All" name="All Checks ok?" />
+    <bpmn:task id="Task_QA" name="QA Estimate (service: qaEstimate)" />
+    <bpmn:exclusiveGateway id="Gateway_Time" name="Enough Time?" />
+    <bpmn:task id="Task_Release" name="Release Order (service: releaseOrder)" />
+    <bpmn:task id="Task_Resched" name="Reschedule Order (service: rescheduleOrder)" />
+    <bpmn:endEvent id="EndEvent" name="Done" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent" targetRef="Task_ATP" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ATP" targetRef="Gateway_ATP" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Gateway_ATP" targetRef="Task_TRIC">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">yes</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_TRIC" targetRef="Task_RMSL" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_RMSL" targetRef="Gateway_All" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Gateway_All" targetRef="Task_Release">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">ok</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_QA" targetRef="Gateway_Time" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Gateway_Time" targetRef="Task_Release">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">enough</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Gateway_Time" targetRef="Task_Resched">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">not_enough</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_Release" targetRef="EndEvent" />
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_Resched" targetRef="EndEvent" />
+  </bpmn:process>
+  <bpmn:process id="Process_QA" />
+  <bpmn:messageFlow id="MessageFlow_1" name="" sourceRef="Gateway_ATP" targetRef="Task_QA">
+    <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">no</bpmn:conditionExpression>
+  </bpmn:messageFlow>
+  <bpmn:messageFlow id="MessageFlow_2" name="" sourceRef="Gateway_All" targetRef="Task_QA">
+    <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">fail</bpmn:conditionExpression>
+  </bpmn:messageFlow>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_09qflag">
+      <bpmndi:BPMNShape id="Participant_1jmigpg_di" bpmnElement="Participant_Planner" isHorizontal="true">
+        <dc:Bounds x="90" y="80" width="1340" height="200" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Planner_di" bpmnElement="Lane_Planner" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1310" height="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="127" y="170" width="37" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0btxqzn_di" bpmnElement="Participant_QA" isHorizontal="true">
+        <dc:Bounds x="90" y="280" width="1340" height="200" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_QA_Assistant_di" bpmnElement="Lane_QA" isHorizontal="true">
+        <dc:Bounds x="120" y="280" width="1310" height="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="126" y="370" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
+        <dc:Bounds x="152" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="131" y="168" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ATP_di" bpmnElement="Task_ATP">
+        <dc:Bounds x="230" y="115" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ATP_di" bpmnElement="Gateway_ATP" isMarkerVisible="true">
+        <dc:Bounds x="412" y="120" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="417" y="170" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_TRIC_di" bpmnElement="Task_TRIC">
+        <dc:Bounds x="502" y="100" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RMSL_di" bpmnElement="Task_RMSL">
+        <dc:Bounds x="692" y="100" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_All_di" bpmnElement="Gateway_All" isMarkerVisible="true">
+        <dc:Bounds x="862" y="115" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="851" y="165" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Release_di" bpmnElement="Task_Release">
+        <dc:Bounds x="992" y="100" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Resched_di" bpmnElement="Task_Resched">
+        <dc:Bounds x="992" y="300" width="160" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1192" y="118" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1197" y="154" width="27" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_QA_di" bpmnElement="Task_QA">
+        <dc:Bounds x="512" y="320" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Time_di" bpmnElement="Gateway_Time" isMarkerVisible="true">
+        <dc:Bounds x="692" y="335" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="682" y="385" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="188" y="150" />
+        <di:waypoint x="230" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="350" y="145" />
+        <di:waypoint x="412" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="462" y="145" />
+        <di:waypoint x="502" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="622" y="130" />
+        <di:waypoint x="692" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="812" y="130" />
+        <di:waypoint x="862" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="912" y="140" />
+        <di:waypoint x="992" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="652" y="350" />
+        <di:waypoint x="692" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="742" y="360" />
+        <di:waypoint x="992" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="742" y="360" />
+        <di:waypoint x="992" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
+        <di:waypoint x="1132" y="130" />
+        <di:waypoint x="1192" y="136" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
+        <di:waypoint x="1152" y="330" />
+        <di:waypoint x="1192" y="136" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_1_di" bpmnElement="MessageFlow_1">
+        <di:waypoint x="437" y="170" />
+        <di:waypoint x="437" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_2_di" bpmnElement="MessageFlow_2">
+        <di:waypoint x="887" y="165" />
+        <di:waypoint x="887" y="320" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

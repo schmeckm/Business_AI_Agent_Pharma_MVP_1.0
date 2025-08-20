@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Planner Agent Chat</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .pill { display:inline-block; padding:2px 8px; border-radius:999px; background:#e2e8f0; }
+      .pill.on { background:#dcfce7; color:#166534; }
+      .rolebar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      .rolebtn {
+        padding:6px 10px; border-radius:999px; border:1px solid #cbd5e1;
+        background:#fff; cursor:pointer; font-size:12px;
+      }
+      .rolebtn.active { background:#00338D; color:#fff; border-color:#00338D; }
+      .toolbar { display:flex; gap:10px; align-items:center; padding:8px 10px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; }
+      .toolbar #filter { flex:1; padding:6px 8px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; }
+      .toolbar .chk { font-size:12px; color:#475569; display:flex; gap:6px; align-items:center; }
+      
+      /* Eingabeleiste kompakt */
+      footer.composer {
+        display:flex; gap:6px; padding:6px; background:#fff; border:1px solid #e5e7eb; border-radius:8px;
+      }
+      footer.composer input {
+        flex:1; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px;
+      }
+      footer.composer button {
+        padding:6px 12px; font-size:14px; background:#00338D; color:#fff;
+        border:none; border-radius:6px; cursor:pointer;
+      }
+      footer.composer button:hover {
+        background:#002366;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header><h1>Planner Agent Chat</h1></header>
+
+    <div class="wrap" style="max-width:960px;margin:0 auto;padding:16px;display:grid;gap:12px;grid-template-rows:auto auto auto 1fr auto; height:calc(100vh - 56px);">
+      
+      <!-- Status + Rollen -->
+      <div class="meta" style="font-size:12px;color:#334155;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+        <div>
+          <span>Verbindung: <span id="status" class="pill">—</span></span>
+          &nbsp;|&nbsp;
+          <span>AI: <span id="ai" class="pill">OFF</span></span>
+          &nbsp;|&nbsp;
+          <span>Released: <strong id="releasedCount">0</strong></span>
+          &nbsp;/&nbsp;
+          <span>Blocked: <strong id="blockedCount">0</strong></span>
+        </div>
+        <div class="rolebar" aria-label="Rollenfilter">
+          <button class="rolebtn active" data-role="all">All</button>
+          <button class="rolebtn" data-role="planner">Planner</button>
+          <button class="rolebtn" data-role="qa">QA</button>
+          <button class="rolebtn" data-role="purch">Purchasing</button>
+        </div>
+      </div>
+
+      <!-- Filter -->
+<div class="toolbar" style="gap:10px;">
+  <button data-cmd="help">help</button>
+  <button data-cmd="glossary">glossary</button>
+  <button data-cmd="orders list">orders list</button>
+  <button data-cmd="plan run">plan run</button>
+  <button data-cmd="plan run country=DE">plan run country=DE</button>
+</div>
+
+      <!-- Chat-Log -->
+      <section id="log" aria-live="polite"></section>
+
+      <!-- Eingabeleiste -->
+      <footer class="composer classic">
+        <input id="cmd" type="text" placeholder='Befehl eingeben …' autofocus />
+        <button id="send" type="button">Senden</button>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

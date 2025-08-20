@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Planning Flow Designer (BPMN)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,body,#canvas{ height:100%; margin:0; }
+    #toolbar{ position:fixed; top:10px; left:10px; z-index:10; background:#ffffffcc; border-radius:8px; padding:8px; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+    button{ margin-right:6px; }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/bpmn-js@11.5.0/dist/assets/diagram-js.css" />
+  <link rel="stylesheet" href="https://unpkg.com/bpmn-js@11.5.0/dist/assets/bpmn-font/css/bpmn.css" />
+</head>
+<body>
+  <div id="toolbar">
+    <button id="load">Flow laden</button>
+    <button id="save">Flow speichern</button>
+    <span id="msg"></span>
+  </div>
+  <div id="canvas"></div>
+
+  <script src="https://unpkg.com/bpmn-js@11.5.0/dist/bpmn-modeler.development.js"></script>
+  <script>
+    const modeler = new BpmnJS({ container: "#canvas" });
+
+    // 🚀 Neues validiertes Default-XML
+    const DEFAULT_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_1"
+  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="planning" isExecutable="true">
+    <bpmn:startEvent id="start" name="Start"/>
+    <bpmn:task id="t_atp" name="ATP Check (service: atpCheck)" />
+    <bpmn:endEvent id="end" name="End"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="t_atp"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="t_atp" targetRef="end"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="planning">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="100" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="t_atp_di" bpmnElement="t_atp">
+        <dc:Bounds x="200" y="90" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end">
+        <dc:Bounds x="350" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="f1">
+        <di:waypoint x="136" y="118"/>
+        <di:waypoint x="200" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="f2">
+        <di:waypoint x="300" y="120"/>
+        <di:waypoint x="350" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>`;
+
+    async function openXml(xml) {
+      try {
+        await modeler.importXML(xml);
+        modeler.get("canvas").zoom("fit-viewport");
+        console.log("[Designer] Flow geladen");
+      } catch (err) {
+        console.error("[Designer] Import-Fehler:", err);
+        setMsg("Import-Fehler: " + err.message);
+      }
+    }
+
+    function setMsg(t){ 
+      document.getElementById("msg").textContent = t; 
+      setTimeout(()=>setMsg(""), 4000); 
+    }
+
+    document.getElementById("load").onclick = async () => {
+      try {
+        console.log("[Designer] Lade Flow von /api/flow/planning.bpmn ...");
+        const res = await fetch("/api/flow/planning.bpmn");
+        const xml = res.ok ? await res.text() : DEFAULT_XML;
+        await openXml(xml);
+        setMsg("Flow geladen");
+      } catch(e){
+        console.error("[Designer] Laden fehlgeschlagen:", e);
+        setMsg("Laden fehlgeschlagen");
+      }
+    };
+
+    document.getElementById("save").onclick = async () => {
+      try {
+        const { xml } = await modeler.saveXML({ format: true });
+        console.log("[Designer] Speichere Flow, Länge:", xml.length);
+        const res = await fetch("/api/flow/planning.bpmn", {
+          method: "POST",
+          headers: { "content-type":"application/json" },
+          body: JSON.stringify({ xml })
+        });
+        if (res.ok) setMsg("Flow gespeichert");
+        else setMsg("Speichern fehlgeschlagen");
+      } catch(e){
+        console.error("[Designer] Speichern fehlgeschlagen:", e);
+        setMsg("Speichern fehlgeschlagen");
+      }
+    };
+
+    // Autoload
+    document.getElementById("load").click();
+  </script>
+</body>
+</html>

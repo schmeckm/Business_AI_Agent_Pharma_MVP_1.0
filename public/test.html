@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Pharma Planner — WS Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#0b0f14; --panel:#121821; --muted:#7e8a9a; --ok:#58d68d; --warn:#f5b041; --err:#ff6b6b; --txt:#e6edf3; }
+    html, body { height:100%; background:var(--bg); color:var(--txt); font:14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .wrap { max-width:1100px; margin:24px auto; padding:0 16px; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .card { background:var(--panel); border:1px solid #223043; border-radius:12px; padding:12px; }
+    #log { height:52vh; overflow:auto; line-height:1.35; padding:12px; background:#0c121a; border-radius:10px; border:1px solid #1d2737; }
+    .msg { margin:6px 0; padding:6px 8px; border-left:3px solid #2c3e50; background:#0f1620; border-radius:6px; }
+    .msg.system { border-left-color:#85929e; color:#cfd6df; }
+    .msg.chat   { border-left-color:#3498db; }
+    .msg.agent  { border-left-color:#8e44ad; }
+    .msg.event  { border-left-color:#2ecc71; }
+    .msg.error  { border-left-color:#e74c3c; background:#1b0f0f; }
+    .time { color:var(--muted); font-size:12px; margin-right:6px; }
+    .type { font-size:12px; padding:1px 6px; border-radius:999px; background:#1c2635; color:#b4c0cf; margin-right:8px; }
+    .controls button { background:#1b2533; color:#dbe5f3; border:1px solid #2a3b55; padding:8px 10px; border-radius:10px; cursor:pointer; }
+    .controls button:hover { background:#223044; }
+    #input { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3b55; background:#0f1620; color:#e6edf3; }
+    #status { font-size:13px; color:var(--muted); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background:#0b1118; border:1px solid #1c2837; padding:2px 6px; border-radius:6px; color:#d0dae6; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Pharma Planner – WebSocket Test</h2>
+    <div id="status">Verbindung: <span id="conn">…</span> – Ziel: <span id="url">ws://…</span></div>
+
+    <div class="card" style="margin-top:12px;">
+      <div class="controls row" style="margin-bottom:8px;">
+        <button data-cmd="help">help</button>
+        <button data-cmd="glossary">glossary</button>
+        <button data-cmd="orders list">orders list</button>
+        <button data-cmd="order ORD-001 details">order ORD-001 details</button>
+        <button data-cmd="order ORD-002 details">order ORD-002 details</button>
+        <button data-cmd="order ORD-003 details">order ORD-003 details</button>
+        <button data-cmd="plan run">plan run</button>
+        <button data-cmd='plan run country=DE'>plan run country=DE</button>
+        <button id="reconnect">Reconnect</button>
+        <button id="clear">Log leeren</button>
+      </div>
+
+      <div class="row" style="gap:8px; margin-bottom:8px;">
+        <input id="input" placeholder='Nachricht oder Kommando (z.B. "Hallo, was macht die TRIC-Prüfung?")' />
+        <button id="sendBtn">Senden</button>
+      </div>
+
+      <div id="log" class="card"></div>
+    </div>
+
+    <p style="opacity:.8; margin-top:10px;">
+      Tipp: KI testen mit <span class="kbd">Hallo, was macht die TRIC-Prüfung?</span>, 
+      <span class="kbd">Erkläre RMSL</span> oder <span class="kbd">Was bedeutet ATP?</span>
+    </p>
+  </div>
+
+  <script>
+    // ---- WS URL aus config.js injizieren ----
+    const WS_URL = window.CONFIG?.wsUrl || "ws://localhost:5174";
+    document.getElementById('url').textContent = WS_URL;
+
+    const $log = document.getElementById('log');
+    const $conn = document.getElementById('conn');
+    const $input = document.getElementById('input');
+
+    let ws, reconnectTimer;
+
+    function ts() {
+      const d = new Date();
+      return d.toLocaleTimeString();
+    }
+
+    function line(type, payload) {
+      const div = document.createElement('div');
+      div.className = `msg ${type || 'system'}`;
+      const pretty = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
+      div.innerHTML = `<span class="time">[${ts()}]</span><span class="type">${type||'system'}</span><span class="text"></span>`;
+      div.querySelector('.text').textContent = pretty;
+      $log.appendChild(div);
+      $log.scrollTop = $log.scrollHeight;
+    }
+
+    function setStatus(text) { $conn.textContent = text; }
+
+    function connect() {
+      clearTimeout(reconnectTimer);
+      setStatus('verbinde…');
+      ws = new WebSocket(WS_URL);
+
+      ws.addEventListener('open', () => {
+        setStatus('verbunden');
+        line('system', 'WS verbunden.');
+      });
+
+      ws.addEventListener('message', (ev) => {
+        let data = ev.data;
+        try { data = JSON.parse(data); } catch {}
+        const t = data?.type || 'system';
+        line(t, data);
+      });
+
+      ws.addEventListener('close', () => {
+        setStatus('getrennt – reconnect in 1.5s');
+        line('error', 'WS getrennt. Verbinde erneut …');
+        reconnectTimer = setTimeout(connect, 1500);
+      });
+
+      ws.addEventListener('error', () => {
+        line('error', 'WS Fehler.');
+      });
+    }
+
+    function send(text) {
+      if (!text) return;
+      try {
+        ws.send(JSON.stringify({ type: 'chat', text }));
+      } catch {
+        ws && ws.send(String(text));
+      }
+      line('chat', text);
+      $input.value = '';
+      $input.focus();
+    }
+
+    document.querySelectorAll('button[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', () => send(btn.getAttribute('data-cmd')));
+    });
+    document.getElementById('sendBtn').addEventListener('click', () => send($input.value.trim()));
+    document.getElementById('reconnect').addEventListener('click', () => { try { ws.close(); } catch {} });
+    document.getElementById('clear').addEventListener('click', () => { $log.innerHTML = ''; });
+
+    $input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') send($input.value.trim());
+    });
+
+    connect();
+  </script>
+</body>
+</html>

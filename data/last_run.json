@@ -1,0 +1,26 @@
+{
+  "at": "2025-08-19T18:46:54.415Z",
+  "released": 3,
+  "nonReleased": 0,
+  "result": [
+    {
+      "orderId": "ORD-001",
+      "fg": "FG-100",
+      "country": "DE",
+      "status": "released"
+    },
+    {
+      "orderId": "ORD-002",
+      "fg": "FG-200",
+      "country": "US",
+      "status": "released",
+      "note": "QA-prioritized"
+    },
+    {
+      "orderId": "ORD-003",
+      "fg": "FG-300",
+      "country": "FR",
+      "status": "released"
+    }
+  ]
+}

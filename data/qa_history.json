@@ -1,0 +1,6 @@
+[
+  { "material": "BULK-ALPHA", "durationMin": 180 },
+  { "material": "BULK-ALPHA", "durationMin": 240 },
+  { "material": "BULK-BETA",  "durationMin": 90  },
+  { "material": "BULK-BETA",  "durationMin": 120 }
+]

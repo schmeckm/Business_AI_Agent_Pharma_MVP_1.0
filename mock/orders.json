@@ -1,0 +1,5 @@
+[
+  { "id": "ORD-001", "fg": "FG-100", "country": "DE", "bulkMaterial": "BULK-1", "qtyRequired": 10 },
+  { "id": "ORD-002", "fg": "FG-200", "country": "US", "bulkMaterial": "BULK-2", "qtyRequired": 5  },
+  { "id": "ORD-003", "fg": "FG-300", "country": "FR", "bulkMaterial": "BULK-1", "qtyRequired": 20 }
+]

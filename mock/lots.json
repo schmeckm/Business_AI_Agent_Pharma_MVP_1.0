@@ -1,0 +1,4 @@
+[
+  { "id": "LOT-A", "material": "BULK-1", "tric": ["DE","FR","US"], "rmsl": 75 },
+  { "id": "LOT-B", "material": "BULK-2", "tric": ["DE"], "rmsl": 55 }
+]

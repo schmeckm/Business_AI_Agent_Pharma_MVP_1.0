@@ -1,0 +1,20 @@
+[
+  {
+    "orderId": "ORD-001",
+    "fg": "FG-100",
+    "country": "DE",
+    "status": "bpmn"
+  },
+  {
+    "orderId": "ORD-002",
+    "fg": "FG-200",
+    "country": "US",
+    "status": "bpmn"
+  },
+  {
+    "orderId": "ORD-003",
+    "fg": "FG-300",
+    "country": "FR",
+    "status": "bpmn"
+  }
+]
